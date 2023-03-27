@@ -1,0 +1,23 @@
+
+  #header{
+    width: 30vw;
+    height: 100%;
+
+
+  }
+.ps-sidebar-root {
+
+    height: 100vh;
+
+  }
+
+  body {
+    margin: 0; padding: 0; border: 0;
+}
+#root {
+  display: flex;
+  flex-direction:row;
+}
+
+
+  
