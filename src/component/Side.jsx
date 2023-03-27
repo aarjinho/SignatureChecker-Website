@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom';
 import React, { useState } from "react";
 import "./Side.css";
 import {Sidebar,Menu,MenuItem,useProSidebar} from "react-pro-sidebar";
-import { FaList, FaRegHeart } from "react-icons/fa";
 import {BsSearch} from "react-icons/bs"
+import {GrGroup} from "react-icons/gr"
 import { FiHome, FiLogOut, FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi";
 import { RiPencilLine } from "react-icons/ri";
 import { BiCog } from "react-icons/bi";
@@ -38,11 +38,10 @@ return (
                 {menuCollapse ? (<FiArrowRightCircle/> ) : (<FiArrowLeftCircle/>)}
                 </div>
                 <Menu iconShape="square">
-                <MenuItem active={true} icon={<FiHome />} component={<Link to="/Acceuil" />} >Home
+                <MenuItem active={true} icon={<FiHome />} component={<Link to="/Acceuil" />} >Acceuil
                 </MenuItem>
                 <MenuItem icon={<BsSearch />} component={<Link to="/Search" />}>Search</MenuItem>
-                <MenuItem icon={<FaRegHeart />}>Favourite</MenuItem>
-                <MenuItem icon={<RiPencilLine />}>Author</MenuItem>
+                <MenuItem icon={<GrGroup />} component={<Link to="/Promo"/>}>Promo</MenuItem>
                 <MenuItem icon={<BiCog />}>Settings</MenuItem>
                 </Menu>
 

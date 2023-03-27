@@ -2,8 +2,10 @@
   #header{
     width: 30vw;
     height: 100%;
-
-
+  }
+svg{
+    width: 1.8rem !important; 
+    height: auto !important;
   }
 .ps-sidebar-root {
 

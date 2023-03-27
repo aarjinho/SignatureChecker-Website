@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import "./search.css"
+import "./Analytics"
+import Analytics from './Analytics';
+
 
 function Search() {
   const [search, setSearch] = useState("");
+  const [student,setStudent] = useState()
   const [searchResults, setSearchResults] = useState([]);
 
-  const data = [{"student":"yahya"},{"student":"ayoub"},{"student":"khalil"},{"student":"mootez"}];
+  const data = [{"student":"yahya","absenceHours":{"lundi":2,"mardi":1,"mercredi":0,"jeudi":3,"vendredi":4}},{"student":"ayoub","absenceHours":{"lundi":2,"mardi":1,"mercredi":0,"jeudi":3,"vendredi":4}},{"student":"khalil","absenceHours":{"lundi":2,"mardi":1,"mercredi":0,"jeudi":3,"vendredi":4}},{"student":"mootez","absenceHours":{"lundi":2,"mardi":1,"mercredi":0,"jeudi":3,"vendredi":4}}];
 
   function searchStudent(event){
     const value = event.target.value;
@@ -19,6 +23,7 @@ function Search() {
 
   function handleResultClick(result) {
     setSearch(result["student"]);
+    setStudent(result)
     setSearchResults([]);
   }
 
@@ -39,7 +44,12 @@ function Search() {
         )}
         <button type="submit">Rechercher</button> 
       </form>
-         
+      {student ? (
+        <div>
+        <h1>Absence Chart</h1>
+        <Analytics data={student} />
+      </div>
+      ) : null}
       </div>
     </>
   );

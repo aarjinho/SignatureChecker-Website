@@ -5,6 +5,7 @@ import Analytics from './pages/Analytics';
 import { ProSidebarProvider } from 'react-pro-sidebar';
 import Side from './component/Side';
 import Search from './pages/Search';
+import Promo from './pages/Promo';
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="" element={<Analytics/>} />
           <Route path="/Acceuil" element={<Acceuil/>} />
           <Route path="/Search" element={<Search/>}/>
+          <Route path="/Promo" element={<Promo/>}/>
         </Routes>
       </ProSidebarProvider>
     </BrowserRouter>
