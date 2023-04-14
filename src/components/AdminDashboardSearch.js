@@ -48,8 +48,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: 'inherit',
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
-    border : "1px solid #429cb7",
-    borderRadius : "8px",
+    border: "1px solid #429cb7",
+    borderRadius: "8px",
 
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
@@ -174,6 +174,8 @@ export default function AdminDashboardSearch() {
   const [paddingHeight, setPaddingHeight] = React.useState(0);
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   useEffect(() => {
     fetch('http://localhost:8080/api/etudiants', {
@@ -182,39 +184,71 @@ export default function AdminDashboardSearch() {
         'Authorization': 'Basic ' + window.btoa('admin:admin')
       }
     })
-  
+
       .then(response => response.json())
       .then(data => {
         setStudents(data);
         setIsLoading(false);
-  
+
         // Ajoutez ce morceau de code ici
         let rowsOnMount = stableSort(
           data, // Utilisez 'data' au lieu de 'students'
           getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY),
         );
-  
+
         rowsOnMount = rowsOnMount.slice(
           0 * DEFAULT_ROWS_PER_PAGE,
           0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
         );
-  
+
         setVisibleRows(rowsOnMount);
         // Fin du morceau de code ajouté
       })
       .catch(error => console.error(error));
   }, []);
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+    console.log(event.target.value);
+  };
+
+  useEffect(() => {
+    const filteredStudents = students.filter((student) => {
+      return (
+        student.nom_etu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.promo_etu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.id.toString().includes(searchTerm)
+      );
+    });
+  
+    const sortedRows = stableSort(filteredStudents, getComparator(order, orderBy));
+    const updatedRows = sortedRows.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage,
+    );
+  
+    setVisibleRows(updatedRows);
+    setPage(0);
+  }, [searchTerm, students, order, orderBy, rowsPerPage]);
   
 
 
   const handleRequestSort = React.useCallback(
     (event, newOrderBy) => {
-      const isAsc = orderBy === newOrderBy && order === 'asc';
-      const toggledOrder = isAsc ? 'desc' : 'asc';
+      const isAsc = orderBy === newOrderBy && order === "asc";
+      const toggledOrder = isAsc ? "desc" : "asc";
       setOrder(toggledOrder);
       setOrderBy(newOrderBy);
 
-      const sortedRows = stableSort(students, getComparator(toggledOrder, newOrderBy));
+      const filteredStudents = students.filter((student) => {
+        return (
+          student.nom_etu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.promo_etu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.id.toString().includes(searchTerm)
+        );
+      });
+
+      const sortedRows = stableSort(filteredStudents, getComparator(toggledOrder, newOrderBy));
       const updatedRows = sortedRows.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
@@ -222,7 +256,7 @@ export default function AdminDashboardSearch() {
 
       setVisibleRows(updatedRows);
     },
-    [order, orderBy, page, rowsPerPage],
+    [order, orderBy, page, rowsPerPage, searchTerm],
   );
 
 
@@ -232,7 +266,15 @@ export default function AdminDashboardSearch() {
     (event, newPage) => {
       setPage(newPage);
 
-      const sortedRows = stableSort(students, getComparator(order, orderBy));
+      const filteredStudents = students.filter((student) => {
+        return (
+          student.nom_etu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.promo_etu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.id.toString().includes(searchTerm)
+        );
+      });
+
+      const sortedRows = stableSort(filteredStudents, getComparator(order, orderBy));
       const updatedRows = sortedRows.slice(
         newPage * rowsPerPage,
         newPage * rowsPerPage + rowsPerPage,
@@ -240,13 +282,12 @@ export default function AdminDashboardSearch() {
 
       setVisibleRows(updatedRows);
 
-      // Avoid a layout jump when reaching the last page with empty rows.
       const numEmptyRows =
         newPage > 0 ? Math.max(0, (1 + newPage) * rowsPerPage - students.length) : 0;
-
     },
-    [order, orderBy, rowsPerPage, students],
+    [order, orderBy, rowsPerPage, students, searchTerm],
   );
+
 
   const handleChangeRowsPerPage = React.useCallback(
     (event) => {
@@ -255,7 +296,15 @@ export default function AdminDashboardSearch() {
 
       setPage(0);
 
-      const sortedRows = stableSort(students, getComparator(order, orderBy));
+      const filteredStudents = students.filter((student) => {
+        return (
+          student.nom_etu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.promo_etu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.id.toString().includes(searchTerm)
+        );
+      });
+
+      const sortedRows = stableSort(filteredStudents, getComparator(order, orderBy));
       const updatedRows = sortedRows.slice(
         0 * updatedRowsPerPage,
         0 * updatedRowsPerPage + updatedRowsPerPage,
@@ -263,31 +312,33 @@ export default function AdminDashboardSearch() {
 
       setVisibleRows(updatedRows);
 
-      // There is no layout jump to handle on the first page.
       setPaddingHeight(0);
     },
-    [order, orderBy,students],
+    [order, orderBy, students, searchTerm],
   );
+
 
 
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Box sx={{display : 'flex', justifyContent : "space-between"}}>
+      <Box sx={{ display: 'flex', justifyContent: "space-between" }}>
 
-      <Typography variant='h6'>
-        Rechercher une personne
-      </Typography>
-      <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase 
-              placeholder="Search…"
-              inputProps={{ 'aria-label': 'search' }}
-              />
-          </Search>
-              </Box>
+        <Typography variant='h6'>
+          Rechercher une personne
+        </Typography>
+        <Search>
+          <SearchIconWrapper>
+            <SearchIcon />
+          </SearchIconWrapper>
+          <StyledInputBase
+            placeholder="Search…"
+            inputProps={{ "aria-label": "search" }}
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+        </Search>
+      </Box>
       <Paper sx={{ width: '100%', mt: 2 }} elevation={6}>
         {isLoading ? (
           <Box
