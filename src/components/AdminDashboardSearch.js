@@ -12,10 +12,57 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Paper from '@mui/material/Paper';
 import { useState, useEffect } from 'react';
 import { CircularProgress } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import InputBase from '@mui/material/InputBase';
+import { styled, alpha } from '@mui/material/styles';
 
 import { visuallyHidden } from '@mui/utils';
 
 
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(1),
+    width: 'auto',
+  },
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    border : "1px solid #429cb7",
+    borderRadius : "8px",
+
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      width: '12ch',
+      '&:focus': {
+        width: '20ch',
+      },
+    },
+  },
+}));
 
 
 
@@ -59,13 +106,13 @@ const headCells = [
     label: 'Identifiant',
   },
   {
-    id: 'name',
+    id: 'nom_etu',
     numeric: false,
     disablePadding: false,
     label: 'Nom et prénom',
   },
   {
-    id: 'promo',
+    id: 'promo_etu',
     numeric: false,
     disablePadding: false,
     label: 'Promotion',
@@ -79,7 +126,7 @@ const headCells = [
 ];
 
 const DEFAULT_ORDER = 'asc';
-const DEFAULT_ORDER_BY = 'calories';
+const DEFAULT_ORDER_BY = 'id';
 const DEFAULT_ROWS_PER_PAGE = 5;
 
 function EnhancedTableHead(props) {
@@ -90,7 +137,7 @@ function EnhancedTableHead(props) {
   };
 
   return (
-    <TableHead>
+    <TableHead >
       <TableRow>
 
         {headCells.map((headCell) => (
@@ -122,7 +169,6 @@ export default function AdminDashboardSearch() {
   const [order, setOrder] = React.useState(DEFAULT_ORDER);
   const [orderBy, setOrderBy] = React.useState(DEFAULT_ORDER_BY);
   const [page, setPage] = React.useState(0);
-  const [rows, setRows] = useState([]);
   const [visibleRows, setVisibleRows] = React.useState(null);
   const [rowsPerPage, setRowsPerPage] = React.useState(DEFAULT_ROWS_PER_PAGE);
   const [paddingHeight, setPaddingHeight] = React.useState(0);
@@ -136,29 +182,30 @@ export default function AdminDashboardSearch() {
         'Authorization': 'Basic ' + window.btoa('admin:admin')
       }
     })
-
+  
       .then(response => response.json())
       .then(data => {
         setStudents(data);
         setIsLoading(false);
-        setRows(data);
+  
+        // Ajoutez ce morceau de code ici
+        let rowsOnMount = stableSort(
+          data, // Utilisez 'data' au lieu de 'students'
+          getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY),
+        );
+  
+        rowsOnMount = rowsOnMount.slice(
+          0 * DEFAULT_ROWS_PER_PAGE,
+          0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
+        );
+  
+        setVisibleRows(rowsOnMount);
+        // Fin du morceau de code ajouté
       })
       .catch(error => console.error(error));
   }, []);
+  
 
-  useEffect(() => {
-    let rowsOnMount = stableSort(
-      rows,
-      getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY),
-    );
-
-    rowsOnMount = rowsOnMount.slice(
-      0 * DEFAULT_ROWS_PER_PAGE,
-      0 * DEFAULT_ROWS_PER_PAGE + DEFAULT_ROWS_PER_PAGE,
-    );
-
-    setVisibleRows(rowsOnMount);
-  }, []);
 
   const handleRequestSort = React.useCallback(
     (event, newOrderBy) => {
@@ -167,7 +214,7 @@ export default function AdminDashboardSearch() {
       setOrder(toggledOrder);
       setOrderBy(newOrderBy);
 
-      const sortedRows = stableSort(rows, getComparator(toggledOrder, newOrderBy));
+      const sortedRows = stableSort(students, getComparator(toggledOrder, newOrderBy));
       const updatedRows = sortedRows.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
@@ -185,7 +232,7 @@ export default function AdminDashboardSearch() {
     (event, newPage) => {
       setPage(newPage);
 
-      const sortedRows = stableSort(rows, getComparator(order, orderBy));
+      const sortedRows = stableSort(students, getComparator(order, orderBy));
       const updatedRows = sortedRows.slice(
         newPage * rowsPerPage,
         newPage * rowsPerPage + rowsPerPage,
@@ -195,10 +242,10 @@ export default function AdminDashboardSearch() {
 
       // Avoid a layout jump when reaching the last page with empty rows.
       const numEmptyRows =
-        newPage > 0 ? Math.max(0, (1 + newPage) * rowsPerPage - rows.length) : 0;
+        newPage > 0 ? Math.max(0, (1 + newPage) * rowsPerPage - students.length) : 0;
 
     },
-    [order, orderBy, rowsPerPage],
+    [order, orderBy, rowsPerPage, students],
   );
 
   const handleChangeRowsPerPage = React.useCallback(
@@ -208,7 +255,7 @@ export default function AdminDashboardSearch() {
 
       setPage(0);
 
-      const sortedRows = stableSort(rows, getComparator(order, orderBy));
+      const sortedRows = stableSort(students, getComparator(order, orderBy));
       const updatedRows = sortedRows.slice(
         0 * updatedRowsPerPage,
         0 * updatedRowsPerPage + updatedRowsPerPage,
@@ -219,17 +266,29 @@ export default function AdminDashboardSearch() {
       // There is no layout jump to handle on the first page.
       setPaddingHeight(0);
     },
-    [order, orderBy],
+    [order, orderBy,students],
   );
 
 
 
   return (
     <Box sx={{ width: '100%' }}>
+      <Box sx={{display : 'flex', justifyContent : "space-between"}}>
+
       <Typography variant='h6'>
         Rechercher une personne
       </Typography>
-      <Paper sx={{ width: '100%', mb: 2 }} elevation={6}>
+      <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase 
+              placeholder="Search…"
+              inputProps={{ 'aria-label': 'search' }}
+              />
+          </Search>
+              </Box>
+      <Paper sx={{ width: '100%', mt: 2 }} elevation={6}>
         {isLoading ? (
           <Box
             display="flex"
@@ -252,25 +311,24 @@ export default function AdminDashboardSearch() {
                   order={order}
                   orderBy={orderBy}
                   onRequestSort={handleRequestSort}
-                  rowCount={rows.length}
+                  rowCount={students.length}
                 />
                 <TableBody>
                   {visibleRows
-                    ? visibleRows.map((row, index) => {
-                      console.log(row);
+                    ? visibleRows.map((students, index) => {
                       return (
                         <TableRow
                           hover
                           //onClick={}
                           role="checkbox"
                           tabIndex={-1}
-                          key={row.id}
+                          key={students.id}
                           sx={{ cursor: 'pointer' }}
                         >
 
-                          <TableCell>{row.id}</TableCell>
-                          <TableCell >{row.nom_etu}</TableCell>
-                          <TableCell >{row.promo_etu}</TableCell>
+                          <TableCell>{students.id}</TableCell>
+                          <TableCell >{students.nom_etu}</TableCell>
+                          <TableCell >{students.promo_etu}</TableCell>
                           <TableCell align='right' >0</TableCell>
                         </TableRow>
                       );
@@ -291,7 +349,7 @@ export default function AdminDashboardSearch() {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={rows.length}
+              count={students.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
