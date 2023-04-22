@@ -20,6 +20,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Outlet, Link } from 'react-router-dom'
 
 
@@ -148,7 +149,7 @@ export default function SideBar() {
         </DrawerHeader>
         <Divider />
         <List sx={{ pt: 1 }} >
-          {[{item : 'Acceuil', link : ''}, {item : 'Recherche', link : 'search'}, {item : 'Parametres', link : 'settings'}].map((text, index) => (
+          {[{item : 'Acceuil', link : ''}, {item : 'Recherche', link : 'search'}, {item : 'Ajouter un étudiant',link:'addstudent'},{item : 'Parametres', link : 'settings'}].map((text, index) => (
               <ListItem  component={Link} to={text.link} key={text.item} disablePadding sx={{ display: 'block', pt: 2, color : "black" }} >
                 <ListItemButton
                   sx={{
@@ -165,7 +166,7 @@ export default function SideBar() {
                       color: "inherit"
                     }}
                   >
-                    {index % 3 === 0 ? <BarChartIcon /> : index % 3 === 1 ? <PersonSearchIcon /> : <SettingsIcon />}
+                    {index  === 0 ? <BarChartIcon /> : index  === 1 ? <PersonSearchIcon /> : index===2 ? <PersonAddIcon /> : <SettingsIcon />  }
                   </ListItemIcon>
                   <ListItemText primary={text.item} sx={{ opacity: open ? 1 : 0 }} />
                 </ListItemButton>

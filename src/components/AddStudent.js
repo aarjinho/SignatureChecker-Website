@@ -6,7 +6,10 @@ import StepLabel from '@mui/material/StepLabel';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
-import { Padding } from '@mui/icons-material';
+import { MenuItem } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 
 const steps = ['Select campaign settings', 'Create an ad group', 'Create an ad'];
 
@@ -34,14 +37,21 @@ export default function HorizontalLinearStepper() {
     setChosenTd(undefined);
   }
 
-
-  function hello(){
-    console.log(activeStep)
-    console.log(nom)
-    console.log(prenom)
-    console.log(email)
-    console.log(chosenPromo)
-    console.log(chosenTd)
+  function addStudent(){
+    const student = {
+      nom: nom,
+      prenom: prenom,
+      email: email,
+      promo: chosenPromo.promo,
+      td: chosenTd
+    }
+    fetch("http://localhost:8080/api/etudiants", {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(student)
+    }).then(() => {
+      console.log("new student added");
+    })
   }
 
 
@@ -57,25 +67,38 @@ export default function HorizontalLinearStepper() {
     <TextField id="email" value={email} label="Email" onChange={e=>setEmail(e.target.value)} variant="outlined" sx={{ mb: 2 }} />
       </Box>)
 
-    const step3 = (<div style={{margin : "0 auto",width:"50%",textAlign:"center",padding:"4rem"}} className='searchBar'>
-    <label htmlFor="promotion-select">Choississez une Promotion:</label>
-    <select id="promotion-select" value={chosenPromo?.promo} onChange={handlePromoChange}>
-      <option value="">--Choississez une Promotion--</option>
-      {promotions.map(promo => (
-        <option key={promo.promo} value={promo.promo}>{promo.promo}</option>
-      ))}
-    </select>
-    {chosenPromo ? (      
-      <div>
-      <label htmlFor="promotion-select">Choississez un Groupe de TD:</label>
-      <select id="td-select" value={chosenTd} onChange={(e) => setChosenTd(e.target.value)}>
-        <option value="">--Choississez le groupe de TD--</option>
-        {chosenPromo.TDS.map(td => (
-          <option key={td} value={td}>TD {td}</option>
+    const step3 = (
+    <div style={{margin : "0 auto",width:"50%",textAlign:"center",padding:"4rem"}} className='searchBar'>
+      <FormControl sx={{ m: 1, minWidth: 160 }}>
+         <InputLabel id="demo-simple-select-autowidth-label">Promotion</InputLabel>
+            <Select
+              labelId="demo-simple-select-autowidth-label"
+              id="demo-simple-select-autowidth"
+              value={chosenPromo?.promo}
+              label="Promotion"
+              onChange={handlePromoChange}
+            >
+              {promotions.map(promo => (
+                  <MenuItem key={promo.promo} value={promo.promo}>{promo.promo}</MenuItem>
+                ))}
+            </Select>
+        </FormControl>
+{chosenPromo ? ( 
+<FormControl sx={{ m: 1, minWidth: 80 }}>
+  <InputLabel id="demo-simple-select-label">TD</InputLabel>
+    <Select
+      labelId="demo-simple-select-label"
+      id="demo-simple-select"
+      value={chosenTd}
+      label="TD"
+      onChange={(e) => setChosenTd(e.target.value)}
+    >
+     {chosenPromo.TDS.map(td => (
+          <MenuItem key={td} value={td}>TD {td}</MenuItem>
         ))}
-      </select>
-      </div>
-    ) : null}
+    </Select>
+</FormControl>) : null}
+   
   </div>)
   const isStepOptional = (step) => {
     return step === 1;
@@ -94,6 +117,9 @@ export default function HorizontalLinearStepper() {
 
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     setSkipped(newSkipped);
+    if(activeStep === 2){
+      addStudent()
+    }
   };
 
   const handleBack = () => {
@@ -169,7 +195,7 @@ export default function HorizontalLinearStepper() {
               </Button>
             )}
 
-            <Button onClick={handleNext}>
+            <Button onClick={handleNext} >
               {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
             </Button>
           </Box>
